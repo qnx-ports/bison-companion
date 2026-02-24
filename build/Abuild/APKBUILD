@@ -1,0 +1,52 @@
+# Maintainer: Leo Shen <yishen@qnx.com>
+# Alpine-Contributor: Łukasz Jendrysik <scadu@yandex.com>
+# Alpine-Maintainer: Celeste <cielesti@protonmail.com>
+pkgname=bison
+pkgver=3.8.2
+pkgrel=0
+pkgdesc="The GNU general-purpose parser generator"
+arch="all"
+license="GPL-3.0-or-later"
+url="https://www.gnu.org/software/bison/bison.html"
+makedepends="perl"
+depends="m4"
+checkdepends="bison flex"
+if [ -n "$BOOTSTRAP" ] || [ -n "$APORTS_BOOTSTRAP" ]; then
+    options="!check"
+fi
+source="
+https://ftp.gnu.org/gnu/bison/bison-$pkgver.tar.xz
+disable-snprintf.patch
+"
+subpackages="$pkgname-doc"
+
+build() {
+    CFLAGS="$CFLAGS -O2" \
+    CXXFLAGS="$CXXFLAGS -O2" \
+    ./configure \
+        --build=$CBUILD \
+        --host=$CHOST \
+        --prefix=/usr \
+        --datadir=/usr/share \
+        --infodir=/usr/share/info \
+        --mandir=/usr/share/man \
+	--disable-nls \
+	--enable-relocatable
+    make
+}
+
+check() {
+    make check
+}
+
+package() {
+    make DESTDIR="$pkgdir" install
+    rm -rf "$pkgdir"/$PREFIX/lib/charset.alias
+    rmdir -p "$pkgdir"/$PREFIX/lib 2>/dev/null || true
+}
+
+
+sha512sums="
+d4d23af6671406e97257892f90651b67f2ab95219831372be032190b7156c10a3435d457857e677445df8b2327aacccc15344acbbc3808a6f332a93cce23b444  bison-3.8.2.tar.xz
+23318ed54a303f5c5f928dc55597a141fbf7819d9f2e5116d5bcb921b8d535c3c92d7f1ad1819520d92c91508f142f54c71d932388bc58a3789e0b7cf2e27c6e  disable-snprintf.patch
+"
